@@ -1,0 +1,653 @@
+{
+  "info": {
+    "name": "WeatherOps API",
+    "description": "Event-driven weather intelligence platform API for testing and documentation",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.environment.set('user_id', pm.response.json().id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"SecurePassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    pm.environment.set('access_token', pm.response.json().access_token);",
+                  "    pm.environment.set('refresh_token', pm.response.json().refresh_token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"SecurePassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    pm.environment.set('access_token', pm.response.json().access_token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/refresh",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "refresh"]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/logout",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "logout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Locations",
+      "item": [
+        {
+          "name": "List Locations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/locations",
+              "host": ["{{base_url}}"],
+              "path": ["locations"]
+            }
+          }
+        },
+        {
+          "name": "Create Location",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.environment.set('location_id', pm.response.json().id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Lagos Office\",\n  \"latitude\": 6.5244,\n  \"longitude\": 3.3792\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/locations",
+              "host": ["{{base_url}}"],
+              "path": ["locations"]
+            }
+          }
+        },
+        {
+          "name": "Get Location",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/locations/{{location_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["locations", "{{location_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Location",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Lagos HQ\",\n  \"latitude\": 6.5244,\n  \"longitude\": 3.3792\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/locations/{{location_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["locations", "{{location_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Location",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/locations/{{location_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["locations", "{{location_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rules",
+      "item": [
+        {
+          "name": "Create Rule",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.environment.set('rule_id', pm.response.json().id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"location_id\": \"{{location_id}}\",\n  \"metric\": \"temperature\",\n  \"operator\": \">\",\n  \"threshold\": 35.0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/rules",
+              "host": ["{{base_url}}"],
+              "path": ["rules"]
+            }
+          }
+        },
+        {
+          "name": "Get Location Rules",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/rules/location/{{location_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["rules", "location", "{{location_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Rule",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/rules/{{rule_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["rules", "{{rule_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Rule",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"threshold\": 38.0,\n  \"is_active\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/rules/{{rule_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["rules", "{{rule_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Toggle Rule Status",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/rules/{{rule_id}}/toggle",
+              "host": ["{{base_url}}"],
+              "path": ["rules", "{{rule_id}}", "toggle"]
+            }
+          }
+        },
+        {
+          "name": "Delete Rule",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/rules/{{rule_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["rules", "{{rule_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Alerts",
+      "item": [
+        {
+          "name": "List All Alerts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/alerts?limit=10&offset=0",
+              "host": ["{{base_url}}"],
+              "path": ["alerts"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Alerts by Location",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/alerts/location/{{location_id}}?limit=50",
+              "host": ["{{base_url}}"],
+              "path": ["alerts", "location", "{{location_id}}"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Active High Severity Alerts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/alerts?status=active&severity=HIGH",
+              "host": ["{{base_url}}"],
+              "path": ["alerts"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "active"
+                },
+                {
+                  "key": "severity",
+                  "value": "HIGH"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Alert",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/alerts/{{alert_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["alerts", "{{alert_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Resolve Alert",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"resolved\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/alerts/{{alert_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["alerts", "{{alert_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Alert",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/alerts/{{alert_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["alerts", "{{alert_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Clear All Resolved Alerts",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/alerts/clear-all",
+              "host": ["{{base_url}}"],
+              "path": ["alerts", "clear-all"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "User Preferences",
+      "item": [
+        {
+          "name": "Get Preferences",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/preferences",
+              "host": ["{{base_url}}"],
+              "path": ["preferences"]
+            }
+          }
+        },
+        {
+          "name": "Update Preferences",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notification_channels\": [\"email\", \"webhook\"],\n  \"email_notifications_enabled\": true,\n  \"sms_notifications_enabled\": false,\n  \"webhook_notifications_enabled\": true,\n  \"webhook_url\": \"https://example.com/webhooks/alerts\",\n  \"alert_threshold\": 35.0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/preferences",
+              "host": ["{{base_url}}"],
+              "path": ["preferences"]
+            }
+          }
+        },
+        {
+          "name": "Delete Preferences",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/preferences",
+              "host": ["{{base_url}}"],
+              "path": ["preferences"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000/api/v1"
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    },
+    {
+      "key": "refresh_token",
+      "value": ""
+    },
+    {
+      "key": "user_id",
+      "value": ""
+    },
+    {
+      "key": "location_id",
+      "value": ""
+    },
+    {
+      "key": "rule_id",
+      "value": ""
+    },
+    {
+      "key": "alert_id",
+      "value": ""
+    }
+  ]
+}

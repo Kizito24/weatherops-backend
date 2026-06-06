@@ -1,0 +1,1532 @@
+openapi: 3.0.0
+info:
+  title: WeatherOps API
+  description: >
+    Event-driven weather intelligence platform for real-time monitoring,
+    alert management, and automated weather-triggered actions.
+
+    ## Features
+    - User authentication with JWT tokens
+    - Weather location monitoring
+    - Custom weather alert rules
+    - Real-time alert management
+    - Multi-channel notifications
+    - User preferences and settings
+
+    ## Base URL
+    Production: `https://api.weatherops.local/api/v1`
+    Development: `http://localhost:8000/api/v1`
+  version: 1.1.0
+  contact:
+    name: WeatherOps Support
+    email: support@weatherops.local
+  license:
+    name: Apache 2.0
+  x-logo:
+    url: https://weatherops.local/logo.png
+
+servers:
+  - url: http://localhost:8000/api/v1
+    description: Local development server
+  - url: https://api.weatherops.local/api/v1
+    description: Production server
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Authentication
+    description: User registration, login, and token management
+  - name: Health
+    description: System health and status checks
+  - name: Locations
+    description: Weather monitoring location management
+  - name: Rules
+    description: Weather alert rule definitions and management
+  - name: Alerts
+    description: Weather alert monitoring and management
+  - name: Preferences
+    description: User preferences and notification settings
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from /auth/login endpoint
+
+  schemas:
+    # Authentication Schemas
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: User email address
+          example: user@example.com
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+          description: User password (minimum 8 characters)
+          example: SecurePassword123!
+      description: User registration request
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: User email address
+          example: user@example.com
+        password:
+          type: string
+          description: User password
+          example: SecurePassword123!
+      description: User login request
+
+    TokenResponse:
+      type: object
+      required:
+        - access_token
+        - refresh_token
+        - token_type
+        - expires_in
+      properties:
+        access_token:
+          type: string
+          description: JWT access token for API requests
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U
+        refresh_token:
+          type: string
+          description: JWT refresh token for obtaining new access tokens
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ
+        token_type:
+          type: string
+          enum: [bearer]
+          description: Token authentication type
+          example: bearer
+        expires_in:
+          type: integer
+          description: Access token expiration time in seconds
+          example: 900
+      description: Authentication token response
+
+    RefreshTokenRequest:
+      type: object
+      required:
+        - refresh_token
+      properties:
+        refresh_token:
+          type: string
+          description: Refresh token
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+      description: Token refresh request
+
+    UserResponse:
+      type: object
+      required:
+        - id
+        - email
+        - is_active
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: User unique identifier
+          example: 550e8400-e29b-41d4-a716-446655440000
+        email:
+          type: string
+          format: email
+          description: User email address
+          example: user@example.com
+        is_active:
+          type: boolean
+          description: User account active status
+          example: true
+        created_at:
+          type: string
+          format: date-time
+          description: Account creation timestamp
+          example: 2024-06-05T10:30:00Z
+        updated_at:
+          type: string
+          format: date-time
+          description: Last account update timestamp
+          example: 2024-06-05T10:30:00Z
+      description: User information response
+
+    # Location Schemas
+    LocationCreate:
+      type: object
+      required:
+        - name
+        - latitude
+        - longitude
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Location name/description
+          example: Lagos Office
+        latitude:
+          type: number
+          format: double
+          minimum: -90
+          maximum: 90
+          description: Latitude coordinate
+          example: 6.5244
+        longitude:
+          type: number
+          format: double
+          minimum: -180
+          maximum: 180
+          description: Longitude coordinate
+          example: 3.3792
+      description: Create new location request
+
+    LocationUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Location name/description
+          example: Lagos HQ
+        latitude:
+          type: number
+          format: double
+          minimum: -90
+          maximum: 90
+          description: Latitude coordinate
+          example: 6.5244
+        longitude:
+          type: number
+          format: double
+          minimum: -180
+          maximum: 180
+          description: Longitude coordinate
+          example: 3.3792
+      description: Update location request
+
+    LocationResponse:
+      type: object
+      required:
+        - id
+        - user_id
+        - name
+        - latitude
+        - longitude
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Location unique identifier
+          example: 550e8400-e29b-41d4-a716-446655440000
+        user_id:
+          type: string
+          format: uuid
+          description: Owner user ID
+          example: 660e8400-e29b-41d4-a716-446655440000
+        name:
+          type: string
+          description: Location name
+          example: Lagos Office
+        latitude:
+          type: number
+          format: double
+          description: Latitude coordinate
+          example: 6.5244
+        longitude:
+          type: number
+          format: double
+          description: Longitude coordinate
+          example: 3.3792
+        created_at:
+          type: string
+          format: date-time
+          description: Creation timestamp
+          example: 2024-06-05T10:30:00Z
+        updated_at:
+          type: string
+          format: date-time
+          description: Last update timestamp
+          example: 2024-06-05T10:30:00Z
+      description: Location information response
+
+    # Rule Schemas
+    RuleCreate:
+      type: object
+      required:
+        - location_id
+        - metric
+        - operator
+        - threshold
+      properties:
+        location_id:
+          type: string
+          format: uuid
+          description: ID of the location this rule monitors
+          example: 550e8400-e29b-41d4-a716-446655440000
+        metric:
+          type: string
+          enum:
+            - temperature
+            - rainfall
+            - wind_speed
+            - humidity
+          description: Weather metric to monitor
+          example: temperature
+        operator:
+          type: string
+          enum:
+            - ">"
+            - "<"
+            - ">="
+            - "<="
+            - "=="
+          description: Comparison operator for threshold
+          example: ">"
+        threshold:
+          type: number
+          format: double
+          description: Threshold value that triggers the alert
+          example: 35.0
+      description: Create new weather rule request
+
+    RuleUpdate:
+      type: object
+      properties:
+        metric:
+          type: string
+          enum:
+            - temperature
+            - rainfall
+            - wind_speed
+            - humidity
+          description: Weather metric to monitor
+          example: temperature
+        operator:
+          type: string
+          enum:
+            - ">"
+            - "<"
+            - ">="
+            - "<="
+            - "=="
+          description: Comparison operator for threshold
+          example: ">="
+        threshold:
+          type: number
+          format: double
+          description: Threshold value that triggers the alert
+          example: 38.0
+        is_active:
+          type: boolean
+          description: Enable or disable this rule
+          example: true
+      description: Update weather rule request
+
+    RuleResponse:
+      type: object
+      required:
+        - id
+        - location_id
+        - metric
+        - operator
+        - threshold
+        - is_active
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Rule unique identifier
+          example: 550e8400-e29b-41d4-a716-446655440000
+        location_id:
+          type: string
+          format: uuid
+          description: Location ID
+          example: 660e8400-e29b-41d4-a716-446655440000
+        metric:
+          type: string
+          enum:
+            - temperature
+            - rainfall
+            - wind_speed
+            - humidity
+          description: Weather metric being monitored
+          example: temperature
+        operator:
+          type: string
+          enum:
+            - ">"
+            - "<"
+            - ">="
+            - "<="
+            - "=="
+          description: Comparison operator
+          example: ">"
+        threshold:
+          type: number
+          format: double
+          description: Alert threshold value
+          example: 35.0
+        is_active:
+          type: boolean
+          description: Whether this rule is currently active
+          example: true
+        created_at:
+          type: string
+          format: date-time
+          description: Creation timestamp
+          example: 2024-06-05T10:30:00Z
+        updated_at:
+          type: string
+          format: date-time
+          description: Last update timestamp
+          example: 2024-06-05T10:30:00Z
+      description: Weather rule information response
+
+    # Alert Schemas
+    AlertResponse:
+      type: object
+      required:
+        - id
+        - location_id
+        - rule_id
+        - user_id
+        - metric
+        - actual_value
+        - threshold
+        - operator
+        - severity
+        - status
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Alert unique identifier
+          example: 550e8400-e29b-41d4-a716-446655440000
+        location_id:
+          type: string
+          format: uuid
+          description: Associated location ID
+          example: 660e8400-e29b-41d4-a716-446655440000
+        rule_id:
+          type: string
+          format: uuid
+          description: Associated rule ID
+          example: 770e8400-e29b-41d4-a716-446655440000
+        user_id:
+          type: string
+          format: uuid
+          description: User ID
+          example: 880e8400-e29b-41d4-a716-446655440000
+        metric:
+          type: string
+          enum:
+            - temperature
+            - rainfall
+            - wind_speed
+            - humidity
+          description: Weather metric that triggered alert
+          example: temperature
+        actual_value:
+          type: number
+          format: double
+          description: Current measured value
+          example: 38.5
+        threshold:
+          type: number
+          format: double
+          description: Configured threshold value
+          example: 35.0
+        operator:
+          type: string
+          enum:
+            - ">"
+            - "<"
+            - ">="
+            - "<="
+            - "=="
+          description: Comparison operator used
+          example: ">"
+        severity:
+          type: string
+          enum:
+            - LOW
+            - MEDIUM
+            - HIGH
+          description: Alert severity level
+          example: HIGH
+        status:
+          type: string
+          enum:
+            - active
+            - resolved
+          description: Current alert status
+          example: active
+        weather_snapshot:
+          type: string
+          nullable: true
+          description: JSON snapshot of weather data at alert time
+          example: null
+        created_at:
+          type: string
+          format: date-time
+          description: Alert creation timestamp
+          example: 2024-06-05T10:30:00Z
+        updated_at:
+          type: string
+          format: date-time
+          description: Last update timestamp
+          example: 2024-06-05T10:30:00Z
+        resolved_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: When alert was resolved
+          example: null
+      description: Weather alert information response
+
+    AlertResolve:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - active
+            - resolved
+          description: New alert status
+          example: resolved
+      description: Alert status update request
+
+    # User Preference Schemas
+    UserPreferenceResponse:
+      type: object
+      required:
+        - user_id
+        - notification_channels
+        - email_notifications_enabled
+        - sms_notifications_enabled
+        - webhook_notifications_enabled
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          description: User ID
+          example: 550e8400-e29b-41d4-a716-446655440000
+        notification_channels:
+          type: array
+          items:
+            type: string
+            enum:
+              - email
+              - sms
+              - webhook
+              - system
+          description: Enabled notification channels
+          example:
+            - email
+            - webhook
+        email_notifications_enabled:
+          type: boolean
+          description: Email notifications enabled
+          example: true
+        sms_notifications_enabled:
+          type: boolean
+          description: SMS notifications enabled
+          example: false
+        webhook_notifications_enabled:
+          type: boolean
+          description: Webhook notifications enabled
+          example: true
+        webhook_url:
+          type: string
+          format: uri
+          nullable: true
+          description: Webhook endpoint URL
+          example: https://example.com/webhooks/alerts
+        alert_threshold:
+          type: number
+          format: double
+          nullable: true
+          description: Custom alert threshold
+          example: 35.0
+        created_at:
+          type: string
+          format: date-time
+          description: Creation timestamp
+          example: 2024-06-05T10:30:00Z
+        updated_at:
+          type: string
+          format: date-time
+          description: Last update timestamp
+          example: 2024-06-05T10:30:00Z
+      description: User preference settings response
+
+    UserPreferenceUpdate:
+      type: object
+      properties:
+        notification_channels:
+          type: array
+          items:
+            type: string
+            enum:
+              - email
+              - sms
+              - webhook
+              - system
+          description: Enabled notification channels
+          example:
+            - email
+            - webhook
+        email_notifications_enabled:
+          type: boolean
+          description: Enable email notifications
+          example: true
+        sms_notifications_enabled:
+          type: boolean
+          description: Enable SMS notifications
+          example: false
+        webhook_notifications_enabled:
+          type: boolean
+          description: Enable webhook notifications
+          example: true
+        webhook_url:
+          type: string
+          format: uri
+          nullable: true
+          description: Webhook endpoint URL
+          example: https://example.com/webhooks/alerts
+        alert_threshold:
+          type: number
+          format: double
+          nullable: true
+          description: Custom alert threshold
+          example: 35.0
+      description: Update user preferences request
+
+    # Error Responses
+    ErrorResponse:
+      type: object
+      required:
+        - detail
+      properties:
+        detail:
+          type: string
+          description: Error message
+          example: Invalid credentials
+      description: Error response
+
+    ValidationErrorResponse:
+      type: object
+      required:
+        - detail
+      properties:
+        detail:
+          type: array
+          items:
+            type: object
+            properties:
+              loc:
+                type: array
+                items:
+                  oneOf:
+                    - type: string
+                    - type: integer
+              msg:
+                type: string
+              type:
+                type: string
+          description: Validation error details
+      description: Validation error response
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - healthy
+            - unhealthy
+          description: System health status
+          example: healthy
+      description: System health status response
+
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Health Check
+      description: Check if the API service is healthy and operational
+      security: []
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+      operationId: health_check
+
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register New User
+      description: Create a new user account with email and password
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Invalid registration data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+      operationId: register_user
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Login User
+      description: Authenticate user and obtain access and refresh tokens
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+      operationId: login_user
+
+  /auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh Token
+      description: Obtain a new access token using a refresh token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '401':
+          description: Invalid or expired refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      operationId: refresh_token
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: Logout User
+      description: Invalidate user session and tokens
+      responses:
+        '204':
+          description: Logout successful
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      operationId: logout_user
+
+  /locations:
+    get:
+      tags:
+        - Locations
+      summary: List Locations
+      description: Get all weather monitoring locations for the current user
+      responses:
+        '200':
+          description: Locations retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LocationResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      operationId: list_locations
+
+    post:
+      tags:
+        - Locations
+      summary: Create Location
+      description: Create a new weather monitoring location
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LocationCreate'
+      responses:
+        '201':
+          description: Location created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocationResponse'
+        '400':
+          description: Invalid location data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+      operationId: create_location
+
+  /locations/{location_id}:
+    get:
+      tags:
+        - Locations
+      summary: Get Location
+      description: Get details for a specific location
+      parameters:
+        - name: location_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Location ID
+      responses:
+        '200':
+          description: Location retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocationResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Location not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      operationId: get_location
+
+    patch:
+      tags:
+        - Locations
+      summary: Update Location
+      description: Update location details (name and/or coordinates)
+      parameters:
+        - name: location_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Location ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LocationUpdate'
+      responses:
+        '200':
+          description: Location updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocationResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Location not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+      operationId: update_location
+
+    delete:
+      tags:
+        - Locations
+      summary: Delete Location
+      description: Delete a location and all associated rules and alerts
+      parameters:
+        - name: location_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Location ID
+      responses:
+        '204':
+          description: Location deleted successfully
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Location not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      operationId: delete_location
+
+  /rules:
+    post:
+      tags:
+        - Rules
+      summary: Create Rule
+      description: Create a new weather alert rule for a location
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RuleCreate'
+      responses:
+        '201':
+          description: Rule created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleResponse'
+        '400':
+          description: Invalid rule data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - location access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+      operationId: create_rule
+
+  /rules/location/{location_id}:
+    get:
+      tags:
+        - Rules
+      summary: Get Location Rules
+      description: Get all alert rules for a specific location
+      parameters:
+        - name: location_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Location ID
+      responses:
+        '200':
+          description: Rules retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RuleResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Location not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      operationId: get_location_rules
+
+  /rules/{rule_id}:
+    get:
+      tags:
+        - Rules
+      summary: Get Rule
+      description: Get details for a specific rule
+      parameters:
+        - name: rule_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Rule ID
+      responses:
+        '200':
+          description: Rule retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Rule not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      operationId: get_rule
+
+    patch:
+      tags:
+        - Rules
+      summary: Update Rule
+      description: Update rule configuration (metric, operator, threshold, or active status)
+      parameters:
+        - name: rule_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Rule ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RuleUpdate'
+      responses:
+        '200':
+          description: Rule updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Rule not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+      operationId: update_rule
+
+    delete:
+      tags:
+        - Rules
+      summary: Delete Rule
+      description: Delete a weather alert rule
+      parameters:
+        - name: rule_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Rule ID
+      responses:
+        '204':
+          description: Rule deleted successfully
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Rule not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      operationId: delete_rule
+
+  /rules/{rule_id}/toggle:
+    post:
+      tags:
+        - Rules
+      summary: Toggle Rule Active Status
+      description: Enable or disable a weather alert rule
+      parameters:
+        - name: rule_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Rule ID
+      responses:
+        '200':
+          description: Rule status toggled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Rule not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      operationId: toggle_rule
+
+  /alerts:
+    get:
+      tags:
+        - Alerts
+      summary: List Alerts
+      description: Get weather alerts with optional filtering and pagination
+      parameters:
+        - name: location_id
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+          description: Filter by location UUID
+        - name: severity
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - LOW
+              - MEDIUM
+              - HIGH
+          description: Filter by severity level
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - active
+              - resolved
+          description: Filter by status
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 100
+          description: Maximum number of results
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Number of results to skip
+      responses:
+        '200':
+          description: Alerts retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AlertResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      operationId: get_alerts
+
+  /alerts/location/{location_id}:
+    get:
+      tags:
+        - Alerts
+      summary: Get Location Alerts
+      description: Get active alerts for a specific location
+      parameters:
+        - name: location_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Location ID
+        - name: severity
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - LOW
+              - MEDIUM
+              - HIGH
+          description: Filter by severity
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 50
+          description: Maximum number of results
+      responses:
+        '200':
+          description: Location alerts retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AlertResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Location not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      operationId: get_location_alerts
+
+  /alerts/{alert_id}:
+    get:
+      tags:
+        - Alerts
+      summary: Get Alert
+      description: Get details for a specific alert
+      parameters:
+        - name: alert_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Alert ID
+      responses:
+        '200':
+          description: Alert retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Alert not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      operationId: get_alert
+
+    patch:
+      tags:
+        - Alerts
+      summary: Update Alert
+      description: Update alert status (resolve or reactivate)
+      parameters:
+        - name: alert_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Alert ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlertResolve'
+      responses:
+        '200':
+          description: Alert updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Alert not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+      operationId: update_alert
+
+    delete:
+      tags:
+        - Alerts
+      summary: Delete Alert
+      description: Delete an alert record
+      parameters:
+        - name: alert_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Alert ID
+      responses:
+        '204':
+          description: Alert deleted successfully
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Alert not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      operationId: delete_alert
+
+  /alerts/clear-all:
+    post:
+      tags:
+        - Alerts
+      summary: Clear All Alerts
+      description: Delete all resolved alerts for the current user
+      responses:
+        '204':
+          description: All resolved alerts cleared
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      operationId: clear_all_alerts
+
+  /preferences:
+    get:
+      tags:
+        - Preferences
+      summary: Get User Preferences
+      description: Get user notification preferences and settings
+      responses:
+        '200':
+          description: User preferences retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPreferenceResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Preferences not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      operationId: get_preferences
+
+    patch:
+      tags:
+        - Preferences
+      summary: Update User Preferences
+      description: Update notification channels, webhooks, and thresholds
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPreferenceUpdate'
+      responses:
+        '200':
+          description: User preferences updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPreferenceResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+      operationId: update_preferences
+
+    delete:
+      tags:
+        - Preferences
+      summary: Delete User Preferences
+      description: Reset user preferences to defaults
+      responses:
+        '204':
+          description: User preferences deleted
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      operationId: delete_preferences

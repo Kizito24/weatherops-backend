@@ -1,0 +1,101 @@
+version: '3.9'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: weatherops-postgres
+    environment:
+      POSTGRES_USER: weatherops
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: weatherops
+      POSTGRES_INITDB_ARGS: "-c shared_buffers=256MB -c max_connections=200"
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U weatherops"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - weatherops
+
+  # Redis Cache and Message Broker
+  redis:
+    image: redis:7-alpine
+    container_name: weatherops-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - weatherops
+    command: redis-server --appendonly yes
+
+  # FastAPI Backend
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: weatherops-backend
+    environment:
+      DATABASE_URL: postgresql+asyncpg://weatherops:password@postgres:5432/weatherops
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+      ENVIRONMENT: development
+      DEBUG: "True"
+      SECRET_KEY: dev-secret-key-change-in-production
+    ports:
+      - "8001:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    networks:
+      - weatherops
+
+  # Celery Worker
+  celery_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: weatherops-celery-worker
+    environment:
+      DATABASE_URL: postgresql+asyncpg://weatherops:password@postgres:5432/weatherops
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+      ENVIRONMENT: development
+      DEBUG: "True"
+      SECRET_KEY: dev-secret-key-change-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      backend:
+        condition: service_started
+    volumes:
+      - .:/app
+    networks:
+      - weatherops
+    command: celery -A app.workers.celery_app worker -l info
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  weatherops:
+    driver: bridge
