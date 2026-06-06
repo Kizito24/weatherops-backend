@@ -59,93 +59,57 @@ WeatherOps is a sophisticated backend system designed to:
 - Weather monitoring automation
 - Email and SMS notifications
 
-## 🚀 Quick Start
+## 🚀 Getting Started
 
-### Prerequisites
-- Python 3.12+
-- PostgreSQL 13+
-- Redis 6+
-- Docker & Docker Compose (optional)
+### Quick Start (5 minutes)
 
-### Local Development
+For complete local setup instructions, **see [LOCAL_DEVELOPMENT.md](LOCAL_DEVELOPMENT.md)**.
 
+Quick summary:
 ```bash
-# Clone repository
-git clone <repo-url>
+git clone https://github.com/Kizito24/weatherops-backend.git
 cd weatherops-backend
-
-# Create virtual environment
-python3.12 -m venv venv
-source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements/base.txt
-
-# Set up environment
-cp .env.example .env
-# Edit .env with your configuration
-
-# Run migrations
-alembic upgrade head
-
-# Start development server
-uvicorn app.main:app --reload --port 8000
-
-# In another terminal, start Celery worker
-celery -A app.workers.celery_app worker --loglevel=info
-
-# Start Celery Beat scheduler
-celery -A app.workers.celery_app beat --loglevel=info
+make install       # Install dependencies
+make db-create     # Create local database
+make migrate       # Run migrations
+make start-api     # Start API server
 ```
 
-### Docker Deployment
-
+Then open 3 more terminals:
 ```bash
-# Using docker-compose.railway.yml for local Render-like setup
-docker-compose -f docker-compose.yml up -d
-
-# Access API at http://localhost:8000
-# API docs at http://localhost:8000/docs
+make start-worker  # Celery worker
+make start-beat    # Celery scheduler
+make start-redis   # Redis (if not running as service)
 ```
 
-## 📚 Documentation Structure
+Visit: **http://localhost:8000/docs**
 
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** - System design, data flow, and infrastructure
-- **[DIAGRAMS.md](DIAGRAMS.md)** - UML diagrams (usecase, class, sequence, state, flow)
-- **[API.md](API.md)** - REST API endpoints and specifications
-- **[DEPLOYMENT.md](DEPLOYMENT.md)** - Production deployment on Render
-- **[DEVELOPMENT.md](DEVELOPMENT.md)** - Development guidelines and setup
+## 📚 Documentation
+
+| Document | Purpose |
+|----------|---------|
+| **[LOCAL_DEVELOPMENT.md](LOCAL_DEVELOPMENT.md)** | 📍 **Start here** — Complete local setup guide with Makefile commands |
+| **[ARCHITECTURE.md](ARCHITECTURE.md)** | System design, tech stack, data flow, and infrastructure |
+| **[CELERY_RENDER_SETUP.md](CELERY_RENDER_SETUP.md)** | Celery background worker configuration for Render |
+| **[DEPLOYMENT.md](DEPLOYMENT.md)** | Production deployment on Render |
+| **[DIAGRAMS.md](DIAGRAMS.md)** | System diagrams (architecture, entity relationships) |
+
+**API Docs:** Visit `http://localhost:8000/docs` for interactive Swagger UI (auto-generated from code)
 
 ## 🔧 API Endpoints
 
-### Authentication
-- `POST /api/v1/auth/register` - Register new user
-- `POST /api/v1/auth/login` - Login user
-- `POST /api/v1/auth/refresh` - Refresh access token
+All API endpoints are documented in the interactive API documentation:
 
-### Locations
-- `GET /api/v1/locations` - List user's locations
-- `POST /api/v1/locations` - Create new location
-- `GET /api/v1/locations/{id}` - Get location details
-- `PUT /api/v1/locations/{id}` - Update location
-- `DELETE /api/v1/locations/{id}` - Delete location
+**Swagger UI:** http://localhost:8000/docs  
+**ReDoc:** http://localhost:8000/redoc
 
-### Weather
-- `GET /api/v1/weather` - Get weather for coordinates
-- `GET /api/v1/weather/usage` - Get API usage statistics
-
-### Alerts
-- `GET /api/v1/alerts` - List user's alerts
-- `GET /api/v1/alerts/{id}` - Get alert details
-- `PUT /api/v1/alerts/{id}` - Update alert status
-
-### Rules
-- `GET /api/v1/rules` - List rules
-- `POST /api/v1/rules` - Create rule
-- `GET /api/v1/rules/location/{location_id}` - Get rules for location
-
-### Health
-- `GET /api/v1/health` - Health check endpoint
+Endpoints include:
+- **Authentication** — Register, login, refresh tokens
+- **Locations** — CRUD operations for monitored locations
+- **Weather** — Get current weather and API usage stats
+- **Alerts** — List, view, and update alert status
+- **Rules** — Create and manage alert rules per location
+- **Health** — Service health check
 
 ## 🗄️ Database Schema
 
@@ -223,22 +187,13 @@ See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed instructions.
 
 ## 🐛 Troubleshooting
 
-### Common Issues
+For detailed troubleshooting, database inspection, and common issues, see **[LOCAL_DEVELOPMENT.md → Troubleshooting](LOCAL_DEVELOPMENT.md#troubleshooting)**.
 
-**Database Connection Errors**
-- Verify DATABASE_URL environment variable
-- Check PostgreSQL service is running
-- Review connection string format
-
-**Redis Connection Errors**
-- Verify REDIS_URL environment variable
-- Check Redis service is running
-- Ensure Redis is accessible from app
-
-**Celery Task Failures**
-- Check worker logs for errors
-- Verify Redis is running
-- Review task configuration
+Quick checks:
+- PostgreSQL running? `psql --version`
+- Redis running? `redis-cli ping`
+- Dependencies installed? `make install`
+- Database migrated? `make migrate`
 
 ## 📄 License
 
