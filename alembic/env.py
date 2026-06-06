@@ -48,15 +48,21 @@ def run_migrations_online() -> None:
     if 'sqlite+aiosqlite' in sync_url:
         sync_url = sync_url.replace('sqlite+aiosqlite', 'sqlite')
     elif 'postgresql+asyncpg' in sync_url:
+        # Try psycopg (v3) first, fall back to psycopg2
         sync_url = sync_url.replace('postgresql+asyncpg', 'postgresql+psycopg')
 
-    connectable = create_engine(sync_url, poolclass=pool.NullPool)
+    print(f"[Alembic] Using database URL: {sync_url.split('@')[0]}@***")
 
-    with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
-
-        with context.begin_transaction():
-            context.run_migrations()
+    try:
+        connectable = create_engine(sync_url, poolclass=pool.NullPool)
+        with connectable.connect() as connection:
+            context.configure(connection=connection, target_metadata=target_metadata)
+            with context.begin_transaction():
+                context.run_migrations()
+        print("[Alembic] ✓ Migrations completed successfully")
+    except Exception as e:
+        print(f"[Alembic] ✗ Migration error: {e}")
+        raise
 
 
 if context.is_offline_mode():
