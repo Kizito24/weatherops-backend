@@ -18,8 +18,10 @@ celery_app = Celery(
     backend=backend_url,
 )
 
+accept_content = [s.strip() for s in settings.CELERY_ACCEPT_CONTENT.split(",")]
+
 celery_app.conf.update(
-    accept_content=settings.CELERY_ACCEPT_CONTENT,
+    accept_content=accept_content,
     task_serializer=settings.CELERY_TASK_SERIALIZER,
     result_serializer=settings.CELERY_RESULT_SERIALIZER,
     timezone=settings.CELERY_TIMEZONE,

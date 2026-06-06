@@ -6,11 +6,12 @@ Loads environment variables with type validation and defaults.
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import field_validator
+from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
+    model_config = ConfigDict(str_strip_whitespace=True)
     """Application settings loaded from environment variables."""
 
     # Application
@@ -45,7 +46,7 @@ class Settings(BaseSettings):
     # Celery (uses Redis as broker and backend)
     CELERY_BROKER_URL: str = ""  # Defaults to REDIS_URL if empty
     CELERY_RESULT_BACKEND: str = ""  # Defaults to REDIS_URL if empty
-    CELERY_ACCEPT_CONTENT: list[str] = ["json"]
+    CELERY_ACCEPT_CONTENT: str = "json"  # Comma-separated list
     CELERY_TASK_SERIALIZER: str = "json"
     CELERY_RESULT_SERIALIZER: str = "json"
     CELERY_TIMEZONE: str = "UTC"
@@ -68,13 +69,6 @@ class Settings(BaseSettings):
     # Logging
     LOG_LEVEL: str = "INFO"
     LOG_FORMAT: str = "json"
-
-    @field_validator("CELERY_ACCEPT_CONTENT", mode="before")
-    @classmethod
-    def parse_celery_accept_content(cls, v):
-        if isinstance(v, str):
-            return [s.strip() for s in v.split(",")]
-        return v
 
     class Config:
         env_file = ".env"
