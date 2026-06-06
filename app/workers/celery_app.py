@@ -6,6 +6,7 @@ Integrates with Redis broker and backend.
 from celery import Celery
 
 from app.core.config import get_settings
+from app.workers.beat_schedule import beat_schedule
 
 settings = get_settings()
 
@@ -30,4 +31,7 @@ celery_app.conf.update(
     task_time_limit=settings.CELERY_TASK_TIME_LIMIT,
     worker_prefetch_multiplier=4,
     worker_max_tasks_per_child=1000,
+    beat_schedule=beat_schedule,
 )
+
+celery_app.autodiscover_tasks(["app.workers.tasks"])

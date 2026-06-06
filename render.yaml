@@ -1,7 +1,7 @@
 services:
   - type: web
     name: weatherops-api
-    env: python
+    runtime: python
     plan: starter
     buildCommand: pip install -r requirements/base.txt
     startCommand: bash start.sh
@@ -13,7 +13,7 @@ services:
 
   - type: pserv
     name: weatherops-postgres
-    env: postgres
+    runtime: postgres
     plan: starter
     ipAllowList: []
     envVars:
@@ -30,3 +30,23 @@ services:
     name: weatherops-redis
     plan: starter
     ipAllowList: []
+
+  - type: worker
+    name: weatherops-celery-worker
+    runtime: python
+    plan: starter
+    buildCommand: pip install -r requirements/base.txt
+    startCommand: celery -A app.workers.celery_app worker --loglevel=info --concurrency=2
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12
+
+  - type: worker
+    name: weatherops-celery-beat
+    runtime: python
+    plan: starter
+    buildCommand: pip install -r requirements/base.txt
+    startCommand: celery -A app.workers.celery_app beat --loglevel=info
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12
