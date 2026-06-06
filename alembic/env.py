@@ -48,8 +48,8 @@ def run_migrations_online() -> None:
     if 'sqlite+aiosqlite' in sync_url:
         sync_url = sync_url.replace('sqlite+aiosqlite', 'sqlite')
     elif 'postgresql+asyncpg' in sync_url:
-        # Try psycopg (v3) first, fall back to psycopg2
-        sync_url = sync_url.replace('postgresql+asyncpg', 'postgresql+psycopg')
+        # Remove the asyncpg driver, let SQLAlchemy use the default (psycopg)
+        sync_url = sync_url.replace('postgresql+asyncpg', 'postgresql')
 
     print(f"[Alembic] Using database URL: {sync_url.split('@')[0]}@***")
 
