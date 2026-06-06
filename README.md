@@ -202,8 +202,8 @@ MIT License - See LICENSE file
 ## 📧 Support
 
 For issues, questions, or contributions:
-- GitHub Issues: [Issue Tracker]
-- Email: team@weatherops.com
+- GitHub Issues: Kizito24
+- Email: kizitochiazor@gmail.com
 
 ---
 
