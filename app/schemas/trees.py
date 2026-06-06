@@ -45,8 +45,8 @@ class TreeUsageResponse(BaseModel):
     used: int = Field(..., description="Analyses used this month")
     limit: int = Field(..., description="Monthly analysis limit")
     remaining: int = Field(..., description="Analyses remaining")
-    unlimited: bool = Field(..., description="Whether plan has unlimited analyses")
-    resets_at: str = Field(..., description="When quota resets (ISO timestamp)")
+    unlimited: bool = Field(False, description="Whether plan has unlimited analyses")
+    resets_at: Optional[str] = Field(None, description="When quota resets (ISO timestamp)")
 
     class Config:
         extra = "allow"
@@ -55,9 +55,9 @@ class TreeUsageResponse(BaseModel):
 class TreeAnalysesListResponse(BaseModel):
     """Paginated list of tree analyses."""
 
-    analyses: list[TreeAnalysisResponse] = Field(..., description="List of analyses")
-    next_cursor: Optional[str] = Field(None, description="Cursor for next page")
-    has_more: bool = Field(..., description="Whether more results exist")
+    analyses: list[Any] = Field(default_factory=list, description="List of analyses")
+    cursor: Optional[str] = Field(None, description="Cursor for pagination")
+    has_more: bool = Field(False, description="Whether more results exist")
 
     class Config:
         extra = "allow"
