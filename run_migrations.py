@@ -1,36 +1,37 @@
 #!/usr/bin/env python
 """Database migration runner - called before starting the app."""
 
+import subprocess
 import sys
-from pathlib import Path
-
-# Add project root to path
-sys.path.insert(0, str(Path(__file__).parent))
 
 def run_migrations():
-    """Run Alembic migrations."""
-    from alembic.config import Config
-    from alembic.command import upgrade
-
+    """Run Alembic migrations using subprocess."""
     try:
         print("=" * 50)
         print("Running database migrations...")
         print("=" * 50)
 
-        alembic_cfg = Config("alembic.ini")
-        upgrade(alembic_cfg, "head")
+        result = subprocess.run(
+            ["alembic", "upgrade", "head"],
+            capture_output=False,
+            text=True
+        )
 
-        print("=" * 50)
-        print("✓ Migrations completed successfully")
-        print("=" * 50)
-        return True
+        if result.returncode == 0:
+            print("=" * 50)
+            print("✓ Migrations completed successfully")
+            print("=" * 50)
+            return True
+        else:
+            print("=" * 50)
+            print(f"✗ Migration failed with exit code: {result.returncode}")
+            print("=" * 50)
+            return False
 
     except Exception as e:
         print("=" * 50)
-        print(f"✗ Migration failed: {e}")
+        print(f"✗ Migration error: {e}")
         print("=" * 50)
-        import traceback
-        traceback.print_exc()
         return False
 
 
