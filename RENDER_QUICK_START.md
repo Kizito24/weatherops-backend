@@ -37,13 +37,19 @@
 
 ### In Web Service Settings → Environment:
 
+**Important:** Use the service linking feature (🔗 icon) to automatically use **Internal URLs** for secure, private communication between Render services.
+
 1. **DATABASE_URL**
    - Click 🔗 icon
-   - Select `weatherops-postgres` → `Database URL`
+   - Select `weatherops-postgres` → `Internal Database URL`
+   - ✅ Automatically uses: `postgresql://...@host...` (internal)
+   - ❌ Don't use External URL
 
 2. **REDIS_URL**
    - Click 🔗 icon
-   - Select `weatherops-redis` → `Redis URL`
+   - Select `weatherops-redis` → `Internal Redis URL`
+   - ✅ Automatically uses: `redis://:password@host...` (internal)
+   - ❌ Don't use External URL
 
 ## Set Environment Variables
 

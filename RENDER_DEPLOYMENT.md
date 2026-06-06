@@ -69,14 +69,22 @@ python -c "import secrets; print(secrets.token_urlsafe(32))"
 
 ### 6. Link Services Together
 
+**IMPORTANT:** Always use service linking (🔗 icon) to get **Internal URLs** for secure communication between services. Internal URLs are private and only accessible within your Render project.
+
 **Link PostgreSQL to Web Service:**
 1. Go to web service settings → "Environment"
-2. In "DATABASE_URL" field, click the database icon
-3. Select `weatherops-postgres` → `Database URL`
+2. In "DATABASE_URL" field, click the 🔗 icon
+3. Select `weatherops-postgres` → `Internal Database URL`
+   - Uses format: `postgresql://user:pass@host.internal:5432/db`
+   - ✅ Secure, private communication within Render
+   - ❌ Never use External Database URL (for public internet)
 
 **Link Redis to Web Service:**
-1. In "REDIS_URL" field, click the database icon
-2. Select `weatherops-redis` → `Redis URL`
+1. In "REDIS_URL" field, click the 🔗 icon
+2. Select `weatherops-redis` → `Internal Redis URL`
+   - Uses format: `redis://:password@host.internal:6379`
+   - ✅ Secure, private communication within Render
+   - ❌ Never use External Redis URL
 
 The connection strings will auto-populate and update automatically.
 
@@ -122,12 +130,23 @@ For dedicated workers (if you have many async tasks):
 
 3. Link the same DATABASE_URL and REDIS_URL as the web service
 
+## Understanding Render Database URLs
+
+Render provides two connection URLs for each database:
+
+| URL Type | Purpose | Format | Use Case |
+|----------|---------|--------|----------|
+| **Internal URL** | Private communication within Render project | `postgresql://user:pass@host.internal:5432/db` | ✅ Web services, workers, background jobs |
+| **External URL** | Public internet access | `postgresql://user:pass@dpg-xxx.onrender.com:5432/db` | ❌ Never use for internal services |
+
+**For your app, always use Internal URLs** by clicking the 🔗 icon in environment settings.
+
 ## Environment Variables Reference
 
 | Variable | Source | Example |
 |----------|--------|---------|
-| `DATABASE_URL` | Auto (PostgreSQL) | `postgresql://user:pass@host:5432/weatherops` |
-| `REDIS_URL` | Auto (Redis) | `redis://:password@host:6379` |
+| `DATABASE_URL` | Auto (PostgreSQL - Internal) | `postgresql://user:pass@host.internal:5432/weatherops` |
+| `REDIS_URL` | Auto (Redis - Internal) | `redis://:password@host.internal:6379` |
 | `SECRET_KEY` | Manual | Generated using `secrets.token_urlsafe(32)` |
 | `ENVIRONMENT` | Manual | `production` |
 | `WEATHERAI_API_KEY` | Manual | Your WeatherAI API key |
