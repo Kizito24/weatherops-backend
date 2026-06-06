@@ -41,9 +41,9 @@ class Settings(BaseSettings):
     REDIS_SOCKET_CONNECT_TIMEOUT: int = 5
     REDIS_SOCKET_KEEPALIVE: bool = True
 
-    # Celery
-    CELERY_BROKER_URL: str = "redis://localhost:6379/1"
-    CELERY_RESULT_BACKEND: str = "redis://localhost:6379/2"
+    # Celery (uses Redis as broker and backend)
+    CELERY_BROKER_URL: str = ""  # Defaults to REDIS_URL if empty
+    CELERY_RESULT_BACKEND: str = ""  # Defaults to REDIS_URL if empty
     CELERY_ACCEPT_CONTENT: list[str] = ["json"]
     CELERY_TASK_SERIALIZER: str = "json"
     CELERY_RESULT_SERIALIZER: str = "json"

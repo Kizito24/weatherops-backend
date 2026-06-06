@@ -9,10 +9,13 @@ from app.core.config import get_settings
 
 settings = get_settings()
 
+broker_url = settings.CELERY_BROKER_URL or settings.REDIS_URL
+backend_url = settings.CELERY_RESULT_BACKEND or settings.REDIS_URL
+
 celery_app = Celery(
     __name__,
-    broker=settings.CELERY_BROKER_URL,
-    backend=settings.CELERY_RESULT_BACKEND,
+    broker=broker_url,
+    backend=backend_url,
 )
 
 celery_app.conf.update(
