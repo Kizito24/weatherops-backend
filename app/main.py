@@ -62,6 +62,9 @@ def create_app() -> FastAPI:
         description="Production-grade weather monitoring and alerting system. Monitor weather conditions across multiple locations, create intelligent rules, and receive real-time alerts via email, SMS, and webhooks.",
         version=settings.APP_VERSION,
         lifespan=lifespan,
+        docs_url="/docs",
+        redoc_url="/redoc",
+        openapi_url="/openapi.json",
     )
 
     # CORS middleware
