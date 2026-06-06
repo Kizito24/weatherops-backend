@@ -6,6 +6,7 @@ Loads environment variables with type validation and defaults.
 from functools import lru_cache
 from typing import Literal
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings
 
 
@@ -67,6 +68,13 @@ class Settings(BaseSettings):
     # Logging
     LOG_LEVEL: str = "INFO"
     LOG_FORMAT: str = "json"
+
+    @field_validator("DATABASE_URL", "REDIS_URL", mode="before")
+    @classmethod
+    def strip_urls(cls, v):
+        if isinstance(v, str):
+            return v.strip()
+        return v
 
     class Config:
         env_file = ".env"
