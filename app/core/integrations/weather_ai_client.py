@@ -5,6 +5,7 @@ Integrates with https://api.weather-ai.co/v1 endpoints.
 
 import io
 import logging
+import ssl
 from typing import Any, Optional
 
 import httpx
@@ -50,11 +51,16 @@ class WeatherAIClient:
 
     async def __aenter__(self):
         """Async context manager entry."""
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = True
+        ssl_context.verify_mode = ssl.CERT_REQUIRED
+
         self.client = httpx.AsyncClient(
             timeout=self.timeout,
             headers={
                 "Authorization": f"Bearer {self.api_key}",
             },
+            verify=ssl_context,
         )
         return self
 
@@ -84,11 +90,16 @@ class WeatherAIClient:
             WeatherAIError: If request fails or API returns error.
         """
         if not self.client:
+            ssl_context = ssl.create_default_context()
+            ssl_context.check_hostname = True
+            ssl_context.verify_mode = ssl.CERT_REQUIRED
+
             self.client = httpx.AsyncClient(
                 timeout=self.timeout,
                 headers={
                     "Authorization": f"Bearer {self.api_key}",
                 },
+                verify=ssl_context,
             )
 
         url = f"{self.base_url}{endpoint}"
