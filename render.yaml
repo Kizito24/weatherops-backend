@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: weatherops-api
+    env: python
+    plan: starter
+    buildCommand: pip install -r requirements/base.txt
+    startCommand: "sh -c 'alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT'"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12
+      - key: PORT
+        value: 8000
+
+  - type: pserv
+    name: weatherops-postgres
+    env: postgres
+    plan: starter
+    ipAllowList: []
+    envVars:
+      - key: POSTGRES_USER
+        value: weatherops
+      - key: POSTGRES_PASSWORD
+        fromDatabase:
+          name: weatherops-postgres
+          property: password
+      - key: POSTGRES_DB
+        value: weatherops
+
+  - type: redis
+    name: weatherops-redis
+    plan: starter
+    ipAllowList: []
