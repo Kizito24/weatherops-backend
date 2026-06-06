@@ -59,6 +59,7 @@ def create_app() -> FastAPI:
 
     app = FastAPI(
         title=settings.APP_NAME,
+        description="Production-grade weather monitoring and alerting system. Monitor weather conditions across multiple locations, create intelligent rules, and receive real-time alerts via email, SMS, and webhooks.",
         version=settings.APP_VERSION,
         lifespan=lifespan,
     )
