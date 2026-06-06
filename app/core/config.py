@@ -6,6 +6,7 @@ Loads environment variables with type validation and defaults.
 from functools import lru_cache
 from typing import Literal
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings
 
 
@@ -67,6 +68,13 @@ class Settings(BaseSettings):
     # Logging
     LOG_LEVEL: str = "INFO"
     LOG_FORMAT: str = "json"
+
+    @field_validator("CELERY_ACCEPT_CONTENT", mode="before")
+    @classmethod
+    def parse_celery_accept_content(cls, v):
+        if isinstance(v, str):
+            return [s.strip() for s in v.split(",")]
+        return v
 
     class Config:
         env_file = ".env"
