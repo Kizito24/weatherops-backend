@@ -1,9 +1,12 @@
 #!/bin/bash
-set -e
 
-# Run database migrations
+# Run database migrations with error handling
 echo "Running database migrations..."
-alembic upgrade head
+if alembic upgrade head; then
+    echo "✓ Migrations completed successfully"
+else
+    echo "⚠ Migration failed or database not ready, continuing startup..."
+fi
 
 # Start the application
 echo "Starting application..."
