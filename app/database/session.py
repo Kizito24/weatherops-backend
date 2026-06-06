@@ -15,12 +15,17 @@ from app.core.config import get_settings
 
 settings = get_settings()
 
+# Ensure DATABASE_URL uses asyncpg driver for PostgreSQL
+database_url = settings.DATABASE_URL
+if database_url.startswith("postgresql://") and "+asyncpg" not in database_url:
+    database_url = database_url.replace("postgresql://", "postgresql+asyncpg://")
+
 engine_kwargs = {
     "echo": settings.DATABASE_ECHO,
 }
 
 # Pool parameters are only supported for non-SQLite databases
-if "sqlite" not in settings.DATABASE_URL.lower():
+if "sqlite" not in database_url.lower():
     engine_kwargs.update({
         "pool_size": settings.DATABASE_POOL_SIZE,
         "max_overflow": settings.DATABASE_MAX_OVERFLOW,
@@ -28,7 +33,7 @@ if "sqlite" not in settings.DATABASE_URL.lower():
         "pool_recycle": 3600,
     })
 
-engine = create_async_engine(settings.DATABASE_URL, **engine_kwargs)
+engine = create_async_engine(database_url, **engine_kwargs)
 
 AsyncSessionLocal = async_sessionmaker(
     engine,
