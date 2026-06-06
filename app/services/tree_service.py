@@ -106,6 +106,9 @@ class TreeService:
             logger.info(f"Tree analyses list fetched: limit={limit}")
             return data
         except WeatherAIError as e:
+            if e.status_code == 404:
+                logger.info("Tree analyses endpoint not available (404)")
+                return {"analyses": [], "cursor": None}
             logger.error(f"Failed to list analyses: {e}")
             raise TreeServiceError(f"Failed to list analyses: {e}") from e
 
@@ -133,5 +136,8 @@ class TreeService:
             logger.info("Tree usage fetched")
             return data
         except WeatherAIError as e:
+            if e.status_code == 404:
+                logger.info("Tree usage endpoint not available (404)")
+                return {"plan": "free", "used": 0, "limit": 0, "remaining": 0}
             logger.error(f"Failed to fetch tree usage: {e}")
             raise TreeServiceError(f"Failed to fetch tree usage: {e}") from e

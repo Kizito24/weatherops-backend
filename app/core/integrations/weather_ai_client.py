@@ -18,7 +18,11 @@ logger = logging.getLogger(__name__)
 class WeatherAIError(Exception):
     """Base exception for WeatherAI API errors."""
 
-    pass
+    def __init__(self, message: str, status_code: int | None = None):
+        """Initialize with optional status code."""
+        self.message = message
+        self.status_code = status_code
+        super().__init__(message)
 
 
 class WeatherAIClient:
@@ -111,7 +115,7 @@ class WeatherAIClient:
         except httpx.HTTPStatusError as e:
             error_msg = f"WeatherAI API error {e.response.status_code}: {e.response.text}"
             logger.error(error_msg)
-            raise WeatherAIError(error_msg) from e
+            raise WeatherAIError(error_msg, status_code=e.response.status_code) from e
         except httpx.HTTPError as e:
             logger.error(f"WeatherAI API error: {e}")
             raise WeatherAIError(f"WeatherAI API error: {e}") from e
