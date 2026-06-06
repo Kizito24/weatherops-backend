@@ -69,13 +69,14 @@ class UsageResponse(BaseModel):
     """API usage and quota information."""
 
     plan: str = Field(..., description="Current plan (Free, Pro, Scale)")
-    requests_used: int = Field(..., description="Requests used this month")
-    requests_remaining: int = Field(..., description="Requests remaining")
-    requests_limit: int = Field(..., description="Monthly request limit")
-    ai_requests_used: int = Field(..., description="AI requests used")
-    ai_requests_remaining: int = Field(..., description="AI requests remaining")
-    period_start: str = Field(..., description="Billing period start (ISO timestamp)")
-    period_end: str = Field(..., description="Billing period end (ISO timestamp)")
+    requests_used: Optional[int] = Field(None, alias="requestsUsed", description="Requests used this month")
+    requests_remaining: Optional[int] = Field(None, alias="requestsRemaining", description="Requests remaining")
+    requests_limit: Optional[int] = Field(None, alias="requestsLimit", description="Monthly request limit")
+    ai_requests_used: Optional[int] = Field(None, alias="aiRequests", description="AI requests used")
+    ai_requests_remaining: Optional[int] = Field(None, alias="aiRequestsRemaining", description="AI requests remaining")
+    period_start: Optional[str] = Field(None, alias="periodStart", description="Billing period start (ISO timestamp)")
+    period_end: Optional[str] = Field(None, alias="periodEnd", description="Billing period end (ISO timestamp)")
 
     class Config:
         extra = "allow"
+        populate_by_name = True
