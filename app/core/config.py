@@ -6,12 +6,10 @@ Loads environment variables with type validation and defaults.
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    model_config = ConfigDict(str_strip_whitespace=True)
     """Application settings loaded from environment variables."""
 
     # Application
